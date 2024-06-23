@@ -1,0 +1,20 @@
+show nve interface 
+Interface: nve1, State: Up, encapsulation: VXLAN
+ VPC Capability: VPC-VIP-Only [not-notified]
+ Local Router MAC: 0c62.fa59.0007
+ Host Learning Mode: Data-Plane
+ Source-Interface: loopback0 (primary: 2.2.2.2, secondary: 0.0.0.0)
+
+show nve vni
+Codes: CP - Control Plane        DP - Data Plane          
+       UC - Unconfigured         SA - Suppress ARP        
+       SU - Suppress Unknown Unicast
+ 
+Interface VNI      Multicast-group   State Mode Type [BD/VRF]      Flags
+--------- -------- ----------------- ----- ---- ------------------ -----
+nve1      10100    230.1.1.1         Up    DP   L2 [100]                  
+
+show nve peers 
+Interface Peer-IP          State LearnType Uptime   Router-Mac       
+--------- ---------------  ----- --------- -------- -----------------
+nve1      1.1.1.1          Up    DP        00:42:57 n/a   
