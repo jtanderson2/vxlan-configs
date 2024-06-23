@@ -49,5 +49,6 @@ cli alias name wr copy run start
 
 boot nxos bootflash:/nxos.7.0.3.I7.1.bin 
 router ospf UNDERLAY
+  router-id 1.1.1.1
 no logging console
 
