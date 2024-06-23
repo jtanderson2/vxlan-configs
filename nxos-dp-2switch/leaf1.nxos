@@ -1,0 +1,52 @@
+
+version 7.0(3)I7(1)
+hostname leaf1
+
+feature ospf
+feature pim
+feature vn-segment-vlan-based
+feature nv overlay
+
+ip pim rp-address 3.3.3.3 group-list 224.0.0.0/4
+ip pim ssm range 232.0.0.0/8
+ip pim anycast-rp 3.3.3.3 1.1.1.1
+ip pim anycast-rp 3.3.3.3 2.2.2.2
+vlan 1,100
+vlan 100
+  vn-segment 10100
+
+interface nve1
+  no shutdown
+  source-interface loopback0
+  member vni 10100 mcast-group 230.1.1.1
+
+interface Ethernet1/1
+
+interface Ethernet1/2
+  description TO-LEAF2
+  no switchport
+  ip address 10.10.10.1/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/3
+  description TO-HOST1
+  switchport access vlan 100
+
+interface loopback0
+  description VTEP
+  ip address 1.1.1.1/32
+  ip router ospf UNDERLAY area 0.0.0.0
+
+interface loopback1
+  description ANYCAST-RP
+  ip address 3.3.3.3/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+cli alias name wr copy run start
+
+boot nxos bootflash:/nxos.7.0.3.I7.1.bin 
+router ospf UNDERLAY
+  router-id 1.1.1.1
+no logging console
