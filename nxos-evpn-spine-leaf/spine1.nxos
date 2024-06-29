@@ -1,1 +1,65 @@
+version 7.0(3)I7(1)
+hostname spine1
+
+nv overlay evpn
+feature ospf
+feature bgp
+feature pim
+
+no password strength-check
+
+ip pim rp-address 4.4.4.4 group-list 224.0.0.0/4
+ip pim ssm range 232.0.0.0/8
+ip pim anycast-rp 4.4.4.4 3.3.3.3
+
+interface Ethernet1/1
+  description TO-LEAF1
+  no switchport
+  ip address 10.10.10.5/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/2
+  description TO-LEAF2
+  no switchport
+  ip address 10.10.10.9/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface loopback0
+  description RID
+  ip address 3.3.3.3/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+
+interface loopback1
+  description ANYCAST-RP
+  ip address 4.4.4.4/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+cli alias name wr copy run start
+
+boot nxos bootflash:/nxos.7.0.3.I7.1.bin 
+router ospf UNDERLAY
+  router-id 3.3.3.3
+router bgp 65010
+  router-id 3.3.3.3
+  address-family l2vpn evpn
+  neighbor 1.1.1.1
+    remote-as 65010
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-reflector-client
+  neighbor 2.2.2.2
+    remote-as 65010
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-reflector-client
+no logging console
 
