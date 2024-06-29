@@ -1,4 +1,4 @@
-2 switch VXLAN config example on NXOS with multicast for BUM traffic and data-plane learning.
+2 switch NXOS VXLAN configs with multicast for BUM traffic and data-plane learning.
 
 
 
