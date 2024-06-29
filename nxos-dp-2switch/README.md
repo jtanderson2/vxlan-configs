@@ -1,1 +1,3 @@
 2 switch VXLAN config example on NXOS with multicast and data-plane learning...
+
+![](vnet-subnet-nsg-vm.png)
