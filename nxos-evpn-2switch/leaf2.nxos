@@ -55,7 +55,7 @@ interface Vlan101
   ip forward
 
 interface Vlan200
-  description BBB-ANYCAST-GE
+  description BBB-ANYCAST-GW1
   no shutdown
   vrf member BBB
   ip address 172.16.1.1/24
