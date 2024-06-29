@@ -1,0 +1,149 @@
+version 7.0(3)I7(1)
+hostname leaf2
+
+nv overlay evpn
+feature ospf
+feature bgp
+feature pim
+feature interface-vlan
+feature vn-segment-vlan-based
+feature nv overlay
+
+no password strength-check
+
+fabric forwarding anycast-gateway-mac 0000.2222.4444
+ip pim rp-address 3.3.3.3 group-list 224.0.0.0/4
+ip pim ssm range 232.0.0.0/8
+ip pim anycast-rp 3.3.3.3 1.1.1.1
+ip pim anycast-rp 3.3.3.3 2.2.2.2
+vlan 1,100-101,200-201,300
+vlan 100
+  vn-segment 10100
+vlan 101
+  vn-segment 90001
+vlan 200
+  vn-segment 10200
+vlan 201
+  vn-segment 90002
+vlan 300
+  vn-segment 10300
+
+vrf context AAA
+  vni 90001
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+vrf context BBB
+  vni 90002
+  rd auto
+  address-family ipv4 unicast
+    route-target both auto
+    route-target both auto evpn
+
+interface Vlan100
+  description AAA-ANYCAST-GW
+  no shutdown
+  vrf member AAA
+  ip address 192.168.1.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan101
+  description AAA TENANT L3VNI
+  no shutdown
+  vrf member AAA
+  ip forward
+
+interface Vlan200
+  description BBB-ANYCAST-GE
+  no shutdown
+  vrf member BBB
+  ip address 172.16.1.1/24
+  fabric forwarding mode anycast-gateway
+
+interface Vlan201
+  description BBB TENANT L3VNI
+  no shutdown
+  vrf member BBB
+  ip forward
+
+interface Vlan300
+  description BBB-ANYCAST-GW2
+  no shutdown
+  vrf member BBB
+  ip address 172.16.2.1/24
+  fabric forwarding mode anycast-gateway
+
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 10100 mcast-group 230.1.1.1
+  member vni 10200 mcast-group 230.1.1.1
+  member vni 10300 mcast-group 230.1.1.1
+  member vni 90001 associate-vrf
+  member vni 90002 associate-vrf
+
+interface Ethernet1/1
+
+interface Ethernet1/2
+  description TO-LEAF1
+  no switchport
+  ip address 10.10.10.2/30
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+  no shutdown
+
+interface Ethernet1/3
+  description TO-HOST2
+  switchport access vlan 100
+
+interface Ethernet1/4
+  description TO-HOST4
+  switchport access vlan 300
+
+interface loopback0
+  description VTEP
+  ip address 2.2.2.2/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+
+interface loopback1
+  description ANYCAST-RP
+  ip address 3.3.3.3/32
+  ip router ospf UNDERLAY area 0.0.0.0
+  ip pim sparse-mode
+cli alias name wr copy run start
+
+boot nxos bootflash:/nxos.7.0.3.I7.1.bin 
+router ospf UNDERLAY
+  router-id 2.2.2.2
+router bgp 65010
+  router-id 2.2.2.2
+  neighbor 1.1.1.1
+    remote-as 65010
+    update-source loopback0
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  vrf AAA
+    address-family ipv4 unicast
+      advertise l2vpn evpn
+  vrf BBB
+    address-family ipv4 unicast
+      advertise l2vpn evpn
+	  
+evpn
+  vni 10100 l2
+    rd auto
+    route-target import auto
+    route-target export auto
+  vni 10200 l2
+    rd auto
+    route-target import auto
+    route-target export auto
+  vni 10300 l2
+    rd auto
+    route-target import auto
+    route-target export auto
+no logging console
